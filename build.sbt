@@ -1,3 +1,5 @@
+import com.typesafe.sbt.packager.docker.Cmd
+
 lazy val commonSettings = Seq(
   organization := "com.sandinh",
   version := "1.0.0",
@@ -13,10 +15,26 @@ lazy val depsSettings = libraryDependencies ++= Seq(
 )
 
 lazy val dockerSettings = Seq(
-  Docker / mappings := (Docker / mappings).value.filterNot(_._2.endsWith(".bat")),
+  Docker / mappings := (Docker / mappings).value
+    .filterNot(_._2.endsWith(".bat"))
+    .map {
+      case (f, p) if p.startsWith(s"/opt/docker/lib/${organization.value}") =>
+        f -> p.replace("/opt/", "/opt2/")
+      case x => x
+    },
   dockerUsername := Some("sandinh"),
   dockerBaseImage := "openjdk:8-alpine",
-  dockerExposedPorts := Seq(8072)
+  dockerExposedPorts := Seq(8072),
+  dockerCommands := {
+    val (l, r) = dockerCommands.value.span {
+      case Cmd("ADD", args) => !args.startsWith("--chown=")
+      case _ => true
+    }
+    (l :+
+      r.head :+
+      Cmd("ADD", "--chown=daemon:daemon", "opt2", "/opt")
+    ) ++ r.tail
+  }
 )
 
 lazy val ohzebot = project.in(file("."))
