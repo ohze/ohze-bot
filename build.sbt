@@ -13,11 +13,12 @@ lazy val depsSettings = libraryDependencies ++= Seq(
 )
 
 lazy val dockerSettings = Seq(
-  Docker / mappings := (Universal / mappings).value.filterNot(_._2.endsWith(".bat")),
+  Docker / mappings := (Docker / mappings).value.filterNot(_._2.endsWith(".bat")),
+  dockerUsername := Some("sandinh"),
   dockerBaseImage := "openjdk:8-alpine",
   dockerExposedPorts := Seq(8072)
 )
 
 lazy val ohzebot = project.in(file("."))
-  .enablePlugins(DockerPlugin, JavaAppPackaging, AshScriptPlugin)
+  .enablePlugins(DockerPlugin, AshScriptPlugin)
   .settings(commonSettings ++ depsSettings ++ dockerSettings: _*)
