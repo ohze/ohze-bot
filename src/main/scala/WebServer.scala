@@ -24,9 +24,13 @@ object WebServer {
           complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>pls post</h1>"))
         } ~
         post {
-          entity(as[JsValue]) { js => // will unmarshal JSON to JsValue
-            println(s"-->>\n${js.prettyPrint}")
-            complete("{}")
+          formFieldSeq { fields => // will unmarshal JSON to JsValue
+            println(s"-->>\n${fields.map{ case (k, v) => s"$k=$v"}.mkString("\n")}")
+            complete(HttpEntity(ContentTypes.`application/json`,
+              """
+                |"response_type": "ephemeral",
+                |"text": "done! @thanhbv"
+              """.stripMargin))
           }
         }
       }
