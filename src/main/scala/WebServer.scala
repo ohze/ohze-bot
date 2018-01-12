@@ -5,9 +5,6 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import scala.io.StdIn
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import spray.json._
-
 object WebServer {
   private[this] val Port = 8072
 
@@ -20,10 +17,7 @@ object WebServer {
 
     val route =
       pathPrefix("") {
-        get {
-          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>pls post</h1>"))
-        } ~
-        post {
+        (get | post) {
           formFieldSeq { fields => // will unmarshal JSON to JsValue
             println(s"-->>\n${fields.map{ case (k, v) => s"$k=$v"}.mkString("\n")}")
             complete(HttpEntity(ContentTypes.`application/json`,
@@ -31,6 +25,9 @@ object WebServer {
                 |"response_type": "ephemeral",
                 |"text": "done! @thanhbv"
                 |}""".stripMargin))
+          } ~ { ctx =>
+            println(ctx.request.toString())
+            ctx.complete("unknown!")
           }
         }
       }
