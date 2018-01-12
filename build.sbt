@@ -2,7 +2,7 @@ import com.typesafe.sbt.packager.docker.Cmd
 
 lazy val commonSettings = Seq(
   organization := "com.sandinh",
-  version := "1.0.0",
+  git.useGitDescribe := true,
   scalaVersion := "2.12.4",
   scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-feature", "-target:jvm-1.8")
 )
@@ -38,5 +38,5 @@ lazy val dockerSettings = Seq(
 )
 
 lazy val ohzebot = project.in(file("."))
-  .enablePlugins(DockerPlugin, AshScriptPlugin)
+  .enablePlugins(DockerPlugin, AshScriptPlugin, GitVersioning)
   .settings(commonSettings ++ depsSettings ++ dockerSettings: _*)
