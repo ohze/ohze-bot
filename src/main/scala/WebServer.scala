@@ -27,10 +27,10 @@ object WebServer {
           formFieldSeq { fields => // will unmarshal JSON to JsValue
             println(s"-->>\n${fields.map{ case (k, v) => s"$k=$v"}.mkString("\n")}")
             complete(HttpEntity(ContentTypes.`application/json`,
-              """
+              """{
                 |"response_type": "ephemeral",
                 |"text": "done! @thanhbv"
-              """.stripMargin))
+                |}""".stripMargin))
           }
         }
       }
