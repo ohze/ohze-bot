@@ -9,7 +9,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import spray.json._
 
 object WebServer {
-  private val Port = 8072
+  private[this] val Port = 8072
+
   def main(args: Array[String]) {
 
     implicit val system = ActorSystem("my-system")
@@ -30,12 +31,18 @@ object WebServer {
         }
       }
 
-    val bindingFuture = Http().bindAndHandle(route, "localhost", Port)
+    val bindingFuture = Http().bindAndHandle(route, "0.0.0.0", Port)
 
-    println(s"Server online at http://localhost:$Port/\nPress RETURN to stop...")
+    def shutdown(): Unit = {
+      bindingFuture
+        .flatMap(_.unbind()) // trigger unbinding from the port
+        .onComplete(_ => system.terminate()) // and shutdown when done
+    }
+
+    sys.addShutdownHook(shutdown())
+
+    println(s"Server online at 0.0.0.0:$Port/\nPress RETURN to stop...")
     StdIn.readLine() // let it run until user presses return
-    bindingFuture
-      .flatMap(_.unbind()) // trigger unbinding from the port
-      .onComplete(_ => system.terminate()) // and shutdown when done
+    shutdown()
   }
 }
